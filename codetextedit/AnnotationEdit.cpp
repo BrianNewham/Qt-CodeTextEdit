@@ -107,7 +107,7 @@ AnnotationEdit::AnnotationEdit(Annotator* annotator, CodeTextHighlighter *highli
        synchronizeSceneWithDocument();
     });
     connect(m_textEdit, &AnnotationTextEdit::blockHighlighted, [this](int blockNumber) {
-       GraphicsAnnotationItem *item = m_blockToItemMap[blockNumber];
+       GraphicsAnnotationItem *item = m_blockToItemMap.value(blockNumber, nullptr);
        GraphicsAnnotationItem::setHighlight(item);
     });
     connect(m_graphicsView, &AnnotationGraphicsView::mouseMove, this, &AnnotationEdit::highlightLine);
@@ -232,10 +232,6 @@ void AnnotationEdit::updateAnnotations()
 
 void AnnotationEdit::refreshAnnotations()
 {
-    deleteAll();
-    m_currentItem = nullptr;
-    GraphicsAnnotationItem::setHighlight(nullptr);
-
     QStringList lines;
     bool allBlank = extractLines(m_textEdit->document(), lines);
     if(allBlank)
@@ -246,16 +242,14 @@ void AnnotationEdit::refreshAnnotations()
 
 void AnnotationEdit::rebuildAnnotations(AnnotationMap annotations)
 {
+    deleteAll();
+
     QTextDocument *document = m_textEdit->document();
     m_annotationMap = annotations;
 
     int buttonTab = 0;
     LineNumber lineNum = 0;
     int ascent = 0, descent = 0;
-
-    m_itemMap.clear();
-    m_blockToItemMap.clear();
-    m_itemToBlockMap.clear();
 
     for (QTextBlock block = document->begin(); block != document->end(); block = block.next())
     {
@@ -443,10 +437,12 @@ int AnnotationEdit::longestWidth(const AnnotationContainer& container) const
 
 void AnnotationEdit::deleteAll()
 {
-    m_currentItem = nullptr;
     GraphicsAnnotationItem::setHighlight(nullptr);
+    m_currentItem = nullptr;
     m_graphicsScene->clear();
     m_itemMap.clear();
+    m_blockToItemMap.clear();
+    m_itemToBlockMap.clear();
 
     for(auto container: m_annotationMap.values())
         qDeleteAll(container);
