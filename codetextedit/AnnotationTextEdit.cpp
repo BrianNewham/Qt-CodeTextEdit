@@ -77,6 +77,7 @@ void AnnotationTextEdit::mouseMoveEvent(QMouseEvent* event)
         emit blockHighlighted(-1);
         clearHighlight();
     }
+    QTextEdit::mouseMoveEvent(event);
 }
 
 
