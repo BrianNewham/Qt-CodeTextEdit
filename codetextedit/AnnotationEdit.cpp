@@ -268,12 +268,11 @@ void AnnotationEdit::rebuildAnnotations(AnnotationMap annotations)
 
     for (QTextBlock block = document->begin(); block != document->end(); block = block.next())
     {
-        //QTextLine line = block.layout()->lineAt(0);
-
         int yBlock = int(block.layout()->position().y());
         int yBaseline = yBlock + ascent;
-        //qDebug() << lineNum << "Y: " << yBlock << " ASC, DESC: " << line.ascent() << line.descent();
+        bool inserted = false;
 
+        GraphicsAnnotationItem* item = nullptr;
         if (!block.text().isEmpty())
         {
             AnnotationContainer container = m_annotationMap[lineNum];
@@ -292,14 +291,8 @@ void AnnotationEdit::rebuildAnnotations(AnnotationMap annotations)
                 if (buttonTab < maxWidth)
                     buttonTab = maxWidth;
 
-                GraphicsAnnotationItem* item = new GraphicsAnnotationItem(priorityString,container,buttonIndex);
-                //qDebug() << "rebuild " << block.blockNumber();
-                m_blockToItemMap.insert(block.blockNumber(),item);
-                m_itemToBlockMap.insert(item,block.blockNumber());
+                item  = new GraphicsAnnotationItem(priorityString,container,buttonIndex);
                 m_itemMap.insert(item, container);
-                item->setPos(0,yBaseline);
-                item->setLineAscentDescent(ascent, descent);
-                m_graphicsScene->addItem(item);
                 item->setFont(QFont(fontFamilyAnnotation,fontSize,QFont::Normal));
                 item->setPlainText(priorityString);
                 if (buttonIndex != -1 && item->buttonsCount()>0)
@@ -312,12 +305,22 @@ void AnnotationEdit::rebuildAnnotations(AnnotationMap annotations)
                 {
                     item->setDefaultTextColor(container[0]->alertColor());
                 }
-            }
-        }
+                inserted = true;
+            } // if
+        } // if
+        if (!inserted)
+            item = new GraphicsAnnotationItem;
+
+        m_blockToItemMap.insert(block.blockNumber(),item);
+        m_itemToBlockMap.insert(item,block.blockNumber());
+        item->setPos(0,yBaseline);
+        item->setLineAscentDescent(ascent, descent);
+        m_graphicsScene->addItem(item);
+
         ++ lineNum;
-    }
+    } // for
     int gap = textWidth("   ");
-    for (GraphicsAnnotationItem* item : m_itemMap.keys())
+    for (GraphicsAnnotationItem* item : m_itemToBlockMap.keys())
         item->setButtonTab(buttonTab+gap);
 
     synchronizeSceneWithDocument();

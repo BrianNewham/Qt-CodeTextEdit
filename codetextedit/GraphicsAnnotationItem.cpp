@@ -86,6 +86,12 @@ QRectF AnnotationButton::boundingRect() const
     return QRectF(x - radius, y - radius, diameter, diameter);
 }
 
+GraphicsAnnotationItem::GraphicsAnnotationItem(QGraphicsItem* parent)
+    : QGraphicsItem(parent), m_message(""), m_defaultButton(-1)
+{
+    setPlainText(m_message);
+}
+
 GraphicsAnnotationItem::GraphicsAnnotationItem
     (const QString& message, const AnnotationContainer& container, int defaultButton, QGraphicsItem* parent)
     : QGraphicsItem(parent), m_message(message), m_defaultButton(defaultButton)
@@ -116,7 +122,7 @@ void GraphicsAnnotationItem::paint(QPainter *painter, const QStyleOptionGraphics
         painter->setBrush(brush);
         painter->setPen(Qt::NoPen);
         QRectF highlightRect = rect;
-        highlightRect.setWidth(textRect().width());
+        highlightRect.setWidth(m_buttonTab-4);
         painter->drawRect(highlightRect);
     }
     painter->setBrush(Qt::NoBrush);

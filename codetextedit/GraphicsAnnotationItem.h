@@ -58,6 +58,7 @@ namespace codetextedit
     class GraphicsAnnotationItem : public QGraphicsItem
     {
     public:
+        GraphicsAnnotationItem(QGraphicsItem* parent = nullptr);
         GraphicsAnnotationItem(const QString&, const AnnotationContainer&, int, QGraphicsItem* parent = nullptr);
         void paint(QPainter*, const QStyleOptionGraphicsItem* =nullptr,  QWidget* =nullptr) override;
         void setButtonTab(int tab) {m_buttonTab = tab;}
@@ -75,6 +76,7 @@ namespace codetextedit
         int buttonsCount() {return m_buttonList.count();}
         static void setHighlight(GraphicsAnnotationItem* item);
         void hover();
+        QString message() const {return m_message;}
 
         static const int buttonGap = 16;
     private:
